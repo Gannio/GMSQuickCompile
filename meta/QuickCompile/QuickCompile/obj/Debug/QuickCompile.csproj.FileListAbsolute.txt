@@ -1,0 +1,6 @@
+C:\Users\Gannio\repos\magmml3-judge-repo\meta\QuickCompiler\GMSQuickCompiler.gmx\meta\QuickCompile\QuickCompile\bin\Debug\QuickCompile.dll
+C:\Users\Gannio\repos\magmml3-judge-repo\meta\QuickCompiler\GMSQuickCompiler.gmx\meta\QuickCompile\QuickCompile\bin\Debug\QuickCompile.pdb
+C:\Users\Gannio\repos\magmml3-judge-repo\meta\QuickCompiler\GMSQuickCompiler.gmx\meta\QuickCompile\QuickCompile\obj\Debug\QuickCompile.csproj.AssemblyReference.cache
+C:\Users\Gannio\repos\magmml3-judge-repo\meta\QuickCompiler\GMSQuickCompiler.gmx\meta\QuickCompile\QuickCompile\obj\Debug\QuickCompile.csproj.CoreCompileInputs.cache
+C:\Users\Gannio\repos\magmml3-judge-repo\meta\QuickCompiler\GMSQuickCompiler.gmx\meta\QuickCompile\QuickCompile\obj\Debug\QuickCompile.dll
+C:\Users\Gannio\repos\magmml3-judge-repo\meta\QuickCompiler\GMSQuickCompiler.gmx\meta\QuickCompile\QuickCompile\obj\Debug\QuickCompile.pdb

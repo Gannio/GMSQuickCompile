@@ -1,0 +1,17 @@
+# files listed here will not be committed.
+
+gm_ttt_*
+*.swp
+meta/out.txt
+lw_*.project.gmx
+#backups
+#backups/*
+#backups\*
+*.backup0
+*.backup1
+*.backup0
+images.tsx
+*.tx
+types.xml
+/#backups/
+datafiles/Music/desktop.ini
