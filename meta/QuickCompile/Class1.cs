@@ -51,7 +51,7 @@ namespace QuickCompile
             //string smallImage = parameters[5];// Marshal.PtrToStringAnsi((IntPtr)smallImageC);
 
 
-            string program = "\"" + @"C:\Program Files (x86)\Steam\steamapps\common\gamemaker_studio\GMAssetCompiler.exe" + "\"";
+            string program = "\"" + /*@"C:\Program Files (x86)\Steam\steamapps\common\gamemaker_studio\GMAssetCompiler.exe"*/compilerLoc + "\"";
             string args = " /c /m=win  /config=\"Default\" /tgt=64 /obob=True /obpp=False /obru=True /obes=False /i=3 /j=16 /cvm /tp=2048 /mv=1 /iv=0 /rv=0 /bv=1804 /gn=\"" + gameName + "\" /td=\"" + tempLoc + "\" /cd=\"" + cacheLoc + "\" /sh=True /dbgp=\"6502\" /hip=\"192.168.56.1\" /hprt=\"51268\" /o=\"" + tempLoc + tempName + "\" \"" + projectLoc + "\"";
 
 
