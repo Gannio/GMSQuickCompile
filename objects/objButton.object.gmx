@@ -59,7 +59,12 @@ switch (action)
         
     break;
     case "Compile+Run":
-        var params = global.cacheLocation + "*" + global.tempLocation + "*" + global.compilerLocation + "*" + global.projectLocation + "*" + global.runnerLocation;
+        var doWait = "";
+        if (keyboard_check(vk_lshift) || keyboard_check(vk_rshift))
+        {
+            doWait = "true";
+        }
+        var params = global.cacheLocation + "*" + global.tempLocation + "*" + global.compilerLocation + "*" + global.projectLocation + "*" + global.runnerLocation + "*" + doWait;
         show_debug_message(QuickCompile_Compile(params));
         with (objButton)
         {

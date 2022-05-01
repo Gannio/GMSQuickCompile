@@ -16,14 +16,20 @@ namespace QuickCompile
         {
 
             string[] parameters = Marshal.PtrToStringAnsi((IntPtr)parametersC).Replace("\\\\","\\").Split('*');
-
+            
 
             var t = Task.Run(() => Compile(parameters));
-            //Compile(parameters);
-            
-            //string output = p.StandardOutput.ReadToEnd();
-            //Console.WriteLine(output);
-            return 1;
+
+            if (parameters[5] == "true")
+            {
+                t.Wait();
+            }
+
+                //Compile(parameters);
+
+                //string output = p.StandardOutput.ReadToEnd();
+                //Console.WriteLine(output);
+                return 1;
         }
         static string lastRunCommand = "";
         static string lastRunArgs = "";
