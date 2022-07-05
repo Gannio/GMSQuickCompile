@@ -1,0 +1,14 @@
+/// xml_string_unescape(string)
+// returns the given string with escape characters removed
+// e.g. &gt; is replaced with >
+
+var str = argument[0];
+
+str = string_replace_all(str, "&gt;", ">");
+str = string_replace_all(str, "&lt;", "<");
+str = string_replace_all(str, "&quot;", '"');
+str = string_replace_all(str, "&#xA;", global.newLine);
+str = string_replace_all(str, "&amp;", "&");
+
+return str;
+

@@ -74,6 +74,9 @@ switch (action)
             }
         }
     break;
+    case "RoomEditor":
+        room = lvlEditor;
+    break;
 
 }
 
@@ -134,7 +137,7 @@ switch (action)
             <kind>1</kind>
             <string>draw_self();
 draw_set_valign(fa_middle);
-if (action == "Run" || action == "Compile+Run")
+if (action == "Run" || action == "Compile+Run" || action == "RoomEditor")
 {
     draw_set_color(c_black);
     draw_set_halign(fa_center);
