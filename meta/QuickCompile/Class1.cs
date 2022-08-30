@@ -41,6 +41,41 @@ namespace QuickCompile
             string compilerLoc = parameters[2];//Marshal.PtrToStringAnsi((IntPtr)largeC);
             string projectLoc = parameters[3];// Marshal.PtrToStringAnsi((IntPtr)smallC);
             string runnerLoc = "\"" + parameters[4] + "\"";
+            bool doWait = parameters[5] == "true";
+            string featherweightParams = "";
+
+            if (parameters.Length > 6)
+            {
+                featherweightParams = parameters[6];
+                var excludeData = "";
+                if (parameters.Length > 7)
+                {
+                    excludeData = " -nd";
+                }
+                var slurDir = Path.GetDirectoryName(projectLoc) + "\\meta\\gmslur.exe";
+                string featherWeightProject = Path.GetDirectoryName(projectLoc);
+                featherWeightProject = featherWeightProject + "\\lw_" + Path.GetFileName(projectLoc);
+                //Console.WriteLine(fBuild);
+                var argF = "-x -gp -uc" + excludeData + " -roomw \"" + featherweightParams + "\" -p \"" + featherWeightProject + "\""/*args*/;
+                Console.WriteLine(argF);
+                var fBuild = new ProcessStartInfo(slurDir)
+                {
+                    Arguments = argF,
+
+                    UseShellExecute = !doWait,
+                    CreateNoWindow = false,
+                    //RedirectStandardInput = true,
+                    RedirectStandardOutput = doWait
+                };
+                var f = Process.Start(fBuild);
+                if (doWait)
+                {
+                    Console.WriteLine(f.StandardOutput.ReadToEnd());
+                }
+                f.WaitForExit();
+                
+                projectLoc = featherWeightProject;
+            }
             DateTime now = DateTime.Now;
             string tempName = "\\gm_TQCFiles\\gm_TQC_" + now.Ticks.ToString();
 
@@ -59,14 +94,14 @@ namespace QuickCompile
 
 
 
-            var psi = new ProcessStartInfo(program)
+            var psi = new ProcessStartInfo(program)//For technical reasons, this part can't do the usual wait.
             {
                 Arguments = args,
 
-                UseShellExecute = true,
+                UseShellExecute = true,//!doWait,
                 CreateNoWindow = false,
                 //RedirectStandardInput = true,
-                //RedirectStandardOutput = true
+                //RedirectStandardOutput = doWait
             };
             var p = Process.Start(psi);
             p.WaitForExit();
@@ -89,7 +124,7 @@ namespace QuickCompile
 
 
             lastRunCommand = runnerLoc;//newRunner;
-            lastRunArgs = " -game " + tempLoc + tempName + "\\" + gameName + ".win";
+            lastRunArgs = " -game \"" + tempLoc + tempName + "\\" + gameName + ".win\"";
             lastRunCD = "cd \"" + tempLoc + tempName + "\\\"";
 
             File.WriteAllText(tempLoc + tempName + "\\" + "run.bat", lastRunCD + "\n" + lastRunCommand + lastRunArgs);
@@ -104,9 +139,10 @@ namespace QuickCompile
             psi = new ProcessStartInfo(lastRunCommand)
             {
                 Arguments = lastRunArgs,
-                UseShellExecute = false,
+                UseShellExecute = !doWait,
                 CreateNoWindow = true,
-                WorkingDirectory = tempLoc + tempName + "\\"
+                WorkingDirectory = tempLoc + tempName + "\\",
+                RedirectStandardOutput = doWait
             };
             Console.WriteLine(lastRunCommand);
             //p.StartInfo = psi;
@@ -114,7 +150,48 @@ namespace QuickCompile
             Process.Start(tempLoc + tempName + "\\" + "runLast.bat", null,null,"GMSTest");
             Console.WriteLine(program + args);
         }
-        [DllExport("QuickCompile_Run", CallingConvention.Cdecl)]
+
+        [DllExport("QuickCompile_CleanTemp", CallingConvention.Cdecl)]
+        public static unsafe double CleanTemp(char* parametersC)
+        { 
+            string[] parameters = Marshal.PtrToStringAnsi((IntPtr)parametersC).Replace("\\\\", "\\").Split('*');
+
+            try
+            {
+
+                string dirs = parameters[0] + "\\gm_TQCFiles\\";
+                if (!Directory.Exists(dirs))
+                {
+                    Console.WriteLine("Temp directory does not exist!");
+                }
+                else
+                { 
+                    foreach (string dir in Directory.GetDirectories(dirs))
+                    {
+                        var shortName = dir.Split('\\');
+                        if (shortName[shortName.Length - 1].Contains("gm_TQC_"))
+                        {
+
+
+                            Console.WriteLine("Deleting " + dir);
+
+                            Directory.Delete(dir,true);//file.Delete();
+
+                        }
+                    }
+                    
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return 0;
+            }
+            return 1;
+        }
+
+
+            [DllExport("QuickCompile_Run", CallingConvention.Cdecl)]
         public static unsafe double RunTest()
         {
             if (lastRunCommand == "")
@@ -122,24 +199,29 @@ namespace QuickCompile
                 Console.WriteLine("Wait for compile to finish first!");
                 return 0;
             }
-            Run();
+            Run(false);
             return 1;
 
         }
-        private static void Run()
+        private static void Run(bool doWait = false)
         {
             Console.WriteLine(lastRunCommand);
 
             var psi = new ProcessStartInfo(lastRunCommand)
             {
                 Arguments = lastRunArgs,
-                UseShellExecute = true,
-                CreateNoWindow = false,
+                UseShellExecute = !doWait,
+                CreateNoWindow = doWait,
                 //RedirectStandardInput = true,
-                //RedirectStandardOutput = true
+                RedirectStandardOutput = doWait
             };
-            var p = Process.Start(psi);
 
+            var p = Process.Start(psi);
+            if (doWait)
+            {
+                Console.WriteLine(p.StandardOutput.ReadToEnd());
+                p.WaitForExit();
+            }
             /*p.StandardInput.WriteLine(lastRunCD);
             p.StandardInput.WriteLine(lastRunCommand + lastRunArgs);*/
         }

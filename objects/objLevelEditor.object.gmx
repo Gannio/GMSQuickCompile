@@ -146,10 +146,13 @@ zoomLevel = 1;
 
 
 
-selectedObject = noone;
-selectedObject_XOffset = 0;
-selectedObject_YOffset = 0;
+selectedObjects = ds_list_create();
+selectedObjects_XOffset = ds_list_create();
+selectedObjects_YOffset = ds_list_create();
 holdingObject = false;
+holdingType = 0;
+holding_ScaleX = 1;
+holding_ScaleY = 1;
 
 gridsnap_X = 16;
 gridsnap_Y = 16;
@@ -263,36 +266,173 @@ mouse_x_previous = mouse_x-mouse_motionX;
 mouse_y_previous = mouse_y-mouse_motionY;
 
 
+var addedNewObject = false;
+var foundObject = collision_point(mouse_x,mouse_y,objEditorObject,false,false)
+var isOnEdge = -1;
+if (foundObject)
+{
+    if (ds_list_size(selectedObjects) &lt;= 1 &amp;&amp; ds_list_find_value(selectedObjects,0) == foundObject)
+    {
+        with (foundObject)
+        {
+            var range = 4;
+            var right = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_right,bbox_top,bbox_right,bbox_bottom) &gt; 0//Right box.
+            var up = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_left,bbox_top,bbox_right,bbox_top) &gt; 0//Top box.
+            var left = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_left,bbox_top,bbox_left,bbox_bottom) &gt; 0//Left.
+            var down = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_left,bbox_bottom,bbox_right,bbox_bottom) &gt; 0//Bottom.
+            
+            var X = right+-1*left;
+            var Y = down+-1*up;
+            if !(X == 0 &amp;&amp; Y == 0)
+            {
+                isOnEdge = round(point_direction(0,0,X,Y)/45)%8;
+                show_debug_message(X);
+                show_debug_message(Y);
+                
+            }
+            show_debug_message(isOnEdge);
+        }
+        
+        
+        
+    }
+}
+if (isOnEdge &gt;= 0)
+{
+    var cursors = makeArray(cr_size_we,cr_size_nesw,cr_size_ns,cr_size_nwse,cr_size_we,cr_size_nesw,cr_size_ns,cr_size_nwse);
+    
+    window_set_cursor(cursors[isOnEdge]);
+    
+}
+else if (window_get_cursor() != cr_default)
+{
+    window_set_cursor(cr_default);
+}
+
 if (mouse_check_button_pressed(mb_left))
 {
     //if (selectedObject == noone)
     //{
-    selectedObject = collision_point(mouse_x,mouse_y,objEditorObject,false,false)
+    //selectedObject = collision_point(mouse_x,mouse_y,objEditorObject,false,false)
     //}
-    if (selectedObject == noone)
+    
+    if (foundObject == noone)
     {
         show_debug_message("Todo: Create");
     }
     else
     {
-        selectedObject_XOffset = selectedObject.x-mouse_x;
-        selectedObject_YOffset = selectedObject.y-mouse_y;
+        
+        
+        if !(keyboard_check(vk_shift))
+        {
+            ds_list_clear(selectedObjects);
+            ds_list_clear(selectedObjects_XOffset);
+            ds_list_clear(selectedObjects_YOffset);
+            
+            
+            holdingType = isOnEdge+1;
+            holding_ScaleX = foundObject.image_xscale;
+            holding_ScaleY = foundObject.image_yscale;
+            
+        }
+        
         holdingObject = true;
+        addedNewObject = true;
+        for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
+        {
+            var o = ds_list_find_value(selectedObjects,i);
+            ds_list_set(selectedObjects_XOffset,i,o.x-mouse_x);
+            ds_list_set(selectedObjects_YOffset,i,o.y-mouse_y);
+        }
+        var index = ds_list_find_index(selectedObjects,foundObject);
+        if (index &lt; 0)
+        {
+            ds_list_add(selectedObjects,foundObject);
+            ds_list_add(selectedObjects_XOffset, foundObject.x-mouse_x);
+            ds_list_add(selectedObjects_YOffset, foundObject.y-mouse_y);
+            
+        }
+        else if (keyboard_check(vk_shift))
+        {
+            ds_list_delete(selectedObjects,index);
+            ds_list_delete(selectedObjects_XOffset,index);
+            ds_list_delete(selectedObjects_YOffset,index);
+        }
+        
     }
 }
 else if (mouse_check_button_released(mb_left))
 {
     holdingObject = false;//selectedObject = noone;
+    holdingType = 0;
 }
-if (mouse_check_button(mb_left))
+else if (mouse_check_button(mb_left))
 {
-    if (instance_exists(selectedObject) &amp;&amp; holdingObject)
+    for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
     {
-        selectedObject.x = mouse_x+selectedObject_XOffset;
-        selectedObject.y = mouse_y+selectedObject_YOffset;
-        with (selectedObject)
+        var selectedObject = ds_list_find_value(selectedObjects,i);
+        var xOffset = ds_list_find_value(selectedObjects_XOffset,i);
+        var yOffset = ds_list_find_value(selectedObjects_YOffset,i);
+        if (instance_exists(selectedObject) &amp;&amp; holdingObject)
         {
-            move_snap(16,16);
+            switch (holdingType)
+            {
+                case 0:
+                    selectedObject.x = mouse_x+xOffset;
+                    selectedObject.y = mouse_y+yOffset;
+                    with (selectedObject)
+                    {
+                        move_snap(16,16);
+                    }
+                break;
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    var ht = holdingType;
+                    with (selectedObject)
+                    {
+                        
+                        
+                        
+                        
+                        var xs = 0;
+                        var ys = 0;
+                        if (ht &lt; 3 || ht &gt; 7)
+                        {
+                            xs = round(((mouse_x+xOffset)-(x - sprite_get_xoffset(sprite_index)))/(sprite_get_width(sprite_index))) + other.holding_ScaleX;
+                        }
+                        else if (ht &gt; 3 &amp;&amp; ht &lt; 7)
+                        {
+                            xs = -1*round(((mouse_x+xOffset)-(x + sprite_get_xoffset(sprite_index)))/(sprite_get_width(sprite_index))) + other.holding_ScaleX;
+                        }
+                        
+                        if (ht &gt; 1 &amp;&amp; ht &lt; 5)
+                        {
+                            ys = -1*round(((mouse_y+yOffset)-(y + sprite_get_yoffset(sprite_index)))/(sprite_get_height(sprite_index))) + other.holding_ScaleY;
+                        }
+                        else if (ht &gt; 5)
+                        {
+                            //show_debug_message("V");
+                            ys = round(((mouse_y+yOffset)-(y - sprite_get_yoffset(sprite_index)))/(sprite_get_height(sprite_index))) + other.holding_ScaleY;
+                        }
+                        //var ys = 
+                        if (sign(xs) != 0 &amp;&amp; ht != 3 &amp;&amp; ht != 7)
+                        {
+                            image_xscale = xs;
+                        }
+                        if (sign(ys) != 0 &amp;&amp; ht != 1 &amp;&amp; ht != 5)
+                        {
+                            image_yscale = ys;
+                        }
+                    }
+                break;
+            }
         }
     }
 }
@@ -338,41 +478,74 @@ if (mouse_check_button_pressed(mb_left))
         case "objects-Alpha":
         case "objects-OBJImage":
         case "objects-Color":
-            with (selectedObject)
+            if (ds_list_size(selectedObjects &lt;= 1))
             {
-                switch (other.eventName)
+                var selectedObject = ds_list_find_value(selectedObjects,0);
+                with (selectedObject)
                 {
-                    case "objects-X":
-                        x = real(get_string("Set X value",string(x)));
-                    break;
-                    case "objects-Y":
-                        y = real(get_string("Set Y value",string(y)));
-                    break;
-                    case "objects-XScale":
-                        image_xscale = real(get_string("Set XScale value",string(image_xscale)));
-                    break;
-                    case "objects-YScale":
-                        image_yscale = real(get_string("Set YScale value",string(image_yscale)));
-                    break;
-                    case "objects-XFlip":
-                        image_xscale *= -1;
-                    break;
-                    case "objects-YFlip":
-                        image_yscale *= -1;
-                    break;
-                    case "objects-Angle":
-                        image_angle = real(get_string("Set Image Angle value",string(image_angle)));
-                    break;
-                    case "objects-Alpha":
-                        image_alpha = real(get_string("Set Image Alpha value",string(image_alpha)));
-                    break;
-                    case "objects-OBJImage":break;
-                    case "objects-Color":
-                        image_angle = real(get_string("Set Image Color value (integer form)",string(image_blend)));
-                    break;
+                    switch (other.eventName)
+                    {
+                        case "objects-X":
+                            x = real(get_string("Set X value",string(x)));
+                        break;
+                        case "objects-Y":
+                            y = real(get_string("Set Y value",string(y)));
+                        break;
+                        case "objects-XScale":
+                            image_xscale = real(get_string("Set XScale value",string(image_xscale)));
+                        break;
+                        case "objects-YScale":
+                            image_yscale = real(get_string("Set YScale value",string(image_yscale)));
+                        break;
+                        case "objects-XFlip":
+                            image_xscale *= -1;
+                        break;
+                        case "objects-YFlip":
+                            image_yscale *= -1;
+                        break;
+                        case "objects-Angle":
+                            image_angle = real(get_string("Set Image Angle value",string(image_angle)));
+                        break;
+                        case "objects-Alpha":
+                            image_alpha = real(get_string("Set Image Alpha value",string(image_alpha)));
+                        break;
+                        case "objects-OBJImage":break;
+                        case "objects-Color":
+                            image_angle = real(get_string("Set Image Color value (integer form)",string(image_blend)));
+                        break;
+                    }
                 }
             }
         
+        break;
+    }
+}
+else
+{
+    switch (eventName)
+    {
+        case "objects-XScale":
+        case "objects-YScale":
+        //case "objects-YScale":
+            var diff = mouse_wheel_up() + mouse_wheel_down()*-1;
+            if (diff != 0)
+            {
+                if (ds_list_size(selectedObjects &lt;= 1))
+                {
+                    var selectedObject = ds_list_find_value(selectedObjects,0);
+                    with (selectedObject)
+                    {
+                        if (other.eventName == "objects-YScale")
+                        {
+                            image_yscale += diff;
+                        }
+                        else
+                        {
+                            image_xscale += diff;
+                        }
+                    }
+                }
+            }
         break;
     }
 }
@@ -532,22 +705,30 @@ while (line &lt; maxLineCount)
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>with (selectedObject)
+            <string>for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
 {
-    /*draw_set_color(c_white-background_color);//c_ltgray);
-    draw_rectangle(bbox_left-1,bbox_top-1,bbox_right+1,bbox_bottom+1,false);
-    draw_set_color(c_white);
-    other.depth = depth+1;*/
-    //var oB = image_blend;
-    //image_blend = c_yellow;
-    image_alpha = .5;
-    d3d_set_fog(true,c_yellow,0,0);
-    draw_self();//draw_sprite(sprite_index,image_index,x,y);
-    d3d_set_fog(false,c_white,0,0);
-    image_alpha = 1;
-    //image_blend = oB;
+    var selectedObject = ds_list_find_value(selectedObjects,i);
+    with (selectedObject)
+    {
+        /*draw_set_color(c_white-background_color);//c_ltgray);
+        draw_rectangle(bbox_left-1,bbox_top-1,bbox_right+1,bbox_bottom+1,false);
+        draw_set_color(c_white);
+        other.depth = depth+1;*/
+        //var oB = image_blend;
+        //image_blend = c_yellow;
+        
+        draw_rectangle(bbox_left,bbox_top,bbox_right,bbox_bottom,true);
+        image_alpha = .5;
+        
+        
+        d3d_set_fog(true,c_yellow,0,0);
+        draw_self();//draw_sprite(sprite_index,image_index,x,y);
+        d3d_set_fog(false,c_white,0,0);
+        image_alpha = 1;
+        //image_blend = oB;
+    }
+    //depth = 0;
 }
-//depth = 0;
 </string>
           </argument>
         </arguments>

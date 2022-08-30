@@ -65,6 +65,17 @@
           <argCount>0</argCount>
           <args/>
         </function>
+        <function>
+          <name>QuickCompile_CleanTemp</name>
+          <externalName>QuickCompile_CleanTemp</externalName>
+          <kind>12</kind>
+          <help></help>
+          <returnType>2</returnType>
+          <argCount>1</argCount>
+          <args>
+            <arg>1</arg>
+          </args>
+        </function>
       </functions>
       <constants/>
     </file>

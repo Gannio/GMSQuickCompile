@@ -175,11 +175,22 @@ switch (name)
         buttons = -1;
         buttons[0] = makeArray(16,16,64,64,"OBJImage",sprWindow,0);
         
+        
         for (var i = 0; i &lt; array_length_1d(names); i++)
         {
             buttons[i+1] = makeArray(16+(i%2)*128,16+64+floor(i/2)*64,128,64,names[i],sprite_index,image_index);
+            /*if (i &lt; 4)
+            {
+                var b = buttons[i+1];
+                b[2] /= 2;
+                buttons[i+1] = b;
+            }*/
+            
         }
-        
+        /*for (var i = 2; i &lt; 4; i++)
+        {
+            buttons[i+1] = makeArray(16+(i%2)*128+32,16+64+floor(i/2)*64,64,64,names[i],sprite_index,image_index);
+        }*/
         
     break;
     
@@ -219,16 +230,20 @@ switch (name)
         
         with (objLevelEditor)
         {
-            with (selectedObject)
+            if (ds_list_size(selectedObjects) &lt;= 1)
             {
-                vals[0] = x;
-                vals[1] = y;
-                vals[2] = image_xscale;
-                vals[3] = image_yscale;
-                vals[4] = image_angle;
-                vals[5] = image_alpha;
-                vals[6] = image_blend;
-                vals[7] = sprite_index;
+                selectedObject = ds_list_find_value(selectedObjects,0);
+                with (selectedObject)
+                {
+                    vals[0] = x;
+                    vals[1] = y;
+                    vals[2] = image_xscale;
+                    vals[3] = image_yscale;
+                    vals[4] = image_angle;
+                    vals[5] = image_alpha;
+                    vals[6] = image_blend;
+                    vals[7] = sprite_index;
+                }
             }
         }
     break;

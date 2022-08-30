@@ -59,28 +59,48 @@ switch (action)
         
     break;
     case "Compile+Run":
+    case "Feather Compile &amp; Run":
         var doWait = "";
         if (keyboard_check(vk_lshift) || keyboard_check(vk_rshift))
         {
             doWait = "true";
         }
         var params = global.cacheLocation + "*" + global.tempLocation + "*" + global.compilerLocation + "*" + global.projectLocation + "*" + global.runnerLocation + "*" + doWait;
+        if (action == "Feather Compile &amp; Run")
+        {
+            global.featherweightRooms = get_string("Enter levels you want, spaced apart, without the .room.gmx extension:",global.featherweightRooms);
+            params += "*" + global.featherweightRooms_AlwaysKeep
+            params += " " + global.featherweightRooms;
+            if (global.featherweightExcludeDatafileSearch)
+            {
+                params += "*-nd";
+            }
+        }
         show_debug_message(QuickCompile_Compile(params));
         with (objButton)
         {
             if (action == "Run")
             {
-                y = other.y;
+                y = ystart;//other.y;
             }
         }
+    break;
+    case "Featherweight#Settings":
+        global.featherweightRooms_AlwaysKeep = get_string("Enter rooms that are strictly necessary for your project to run, like rooms leading up to your room select: ",global.featherweightRooms_AlwaysKeep);
+        global.featherweightExcludeDatafileSearch = get_integer("(Use a 0 for false, 1 for true) Include datafiles in the featherweight search? Use 1 if you don't need external rooms.",global.featherweightExcludeDatafileSearch);
+        //global.featherweightRemoveDatafiles = get_integer("(Use a 0 for false, 1 for true) Remove OGG's from the output? Use 1 if you don't need external rooms.",featherweightExcludeDatafileSearch);
+        
     break;
     case "RoomEditor":
         room = lvlEditor;
     break;
+    case "Clean Temp":
+        get_integer("(Use a 0 for false, 1 for true) Are you sure? This will delete *all* previous compiles made using QuickCompiler.",0);
+        QuickCompile_CleanTemp(global.tempLocation);
+        show_debug_message("Done!");
+    break;
 
 }
-
-
 </string>
           </argument>
         </arguments>
@@ -111,6 +131,9 @@ switch (action)
     ini_write_string("main","compiler",global.compilerLocation);
     ini_write_string("main","temp",global.tempLocation);
     ini_write_string("main","runner",global.runnerLocation);
+    ini_write_string("main","fwRoomsAK",global.featherweightRooms_AlwaysKeep);
+    ini_write_string("main","fwRooms",global.featherweightRooms);
+    ini_write_string("main","fwExcludeDataSearch",global.featherweightExcludeDatafileSearch);
     ini_close();
 }
 </string>
@@ -137,7 +160,7 @@ switch (action)
             <kind>1</kind>
             <string>draw_self();
 draw_set_valign(fa_middle);
-if (action == "Run" || action == "Compile+Run" || action == "RoomEditor")
+if (action == "Run" || action == "Compile+Run" || action == "Feather Compile &amp; Run" || action == "RoomEditor" || action == "Featherweight#Settings")
 {
     draw_set_color(c_black);
     draw_set_halign(fa_center);
@@ -175,6 +198,56 @@ else
     draw_text(view_xview,y,loc);
 }
 draw_set_valign(fa_top);
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="9" enumb="65">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>random_set_seed(1);
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="10" enumb="65">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>show_debug_message(irandom(10000));
+show_debug_message(irandom_range(0,10000));
+show_debug_message(random(10000));
+show_debug_message(random_range(0,10000));
+show_debug_message(choose(0,1,2,3,4,5,6,7,8,9,10));
 </string>
           </argument>
         </arguments>
