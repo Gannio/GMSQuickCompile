@@ -49,6 +49,9 @@ buttons = array_create(0);
 
 xPos = 0;
 yPos = 0;
+
+menuColor = c_white;
+menuOutlineColor = c_black;
 </string>
           </argument>
         </arguments>
@@ -105,7 +108,32 @@ switch (dir)
         }
 
     break;
-    
+    case "left":
+        if (isHiding &amp;&amp; xPos &gt; -width+hangMargin)
+        {
+            xPos = max(xPos-24,-width+hangMargin)
+            
+        }
+        else if (!isHiding &amp;&amp; xPos &lt; 0)
+        {
+            //show_debug_message("A");
+            xPos = min(xPos+24,0);
+        }
+
+    break;
+    case "bottom":
+        if (isHiding &amp;&amp; yPos &lt; windowH-hangMargin)
+        {
+            yPos = min(yPos+24,windowH-hangMargin)
+            
+        }
+        else if (!isHiding &amp;&amp; yPos &gt; windowH-height)
+        {
+            //show_debug_message("A");
+            yPos = max(yPos-24,windowH-height);
+        }
+
+    break;
     
 }
 
@@ -193,7 +221,59 @@ switch (name)
         }*/
         
     break;
-    
+    case "tiles":
+        var names = makeArray("X","Y","XScale","YScale","Depth","Color","TileChooser")
+        //Format of a button: X, Y, Width, Height, name, sprite, image. X and Y are *relative* to the menu.
+        /*buttons = makeArray(
+            makeArray(16,16,64,64,"X"),
+            makeArray(16,16,64,64,"Y"),
+            makeArray(16,16,64,64,"XScale"),
+            makeArray(16,16,64,64,"YScale"),
+            
+            
+            );*/
+        buttons = -1;
+        
+        for (var i = 0; i &lt; array_length_1d(names)-1; i++)
+        {
+            buttons[i] = makeArray(16+(i%4)*128,16+floor(i/4)*64,128,64,names[i],sprite_index,image_index);
+            /*if (i &lt; 4)
+            {
+                var b = buttons[i+1];
+                b[2] /= 2;
+                buttons[i+1] = b;
+            }*/
+            
+        }
+        buttons[i] = makeArray(16,16+2*64,600-32,512+48,names[i],-1,0);
+        /*for (var i = 2; i &lt; 4; i++)
+        {
+            buttons[i+1] = makeArray(16+(i%2)*128+32,16+64+floor(i/2)*64,64,64,names[i],sprite_index,image_index);
+        }*/
+        
+    break;
+    case "mode":
+        //var names = makeArray("Objects","Tiles","Room");
+        //Format of a button: X, Y, Width, Height, name, sprite, image. X and Y are *relative* to the menu.
+        buttons = makeArray(
+            makeArray(16+0*128+32,16,128,64,"Objects",sprite_index,image_index),
+            makeArray(16+1*128+32,16,128,64,"Tiles",sprite_index,image_index),
+            makeArray(16+2*128+32,16,128,64,"Room",sprite_index,image_index),
+            
+            
+            );
+        
+        /*for (var i = 2; i &lt; 4; i++)
+        {
+            buttons[i+1] = makeArray(16+(i%2)*128+32,16+64+floor(i/2)*64,64,64,names[i],sprite_index,image_index);
+        }*/
+        
+    break;
+    case "tileSelector":
+        buttons[0] = makeArray(16,16+64,512,512,"Selector",-1,0);
+        buttons[1] = makeArray(16,16,256,64,"BGSelect",sprite_index,image_index);
+        buttons[1] = makeArray(16+256,16,256,64,"DepthSelect",sprite_index,image_index);
+    break;
 }
 </string>
           </argument>
@@ -218,7 +298,31 @@ switch (name)
           <argument>
             <kind>1</kind>
             <string>
-draw_sprite_ext(sprite_index,0,xPos,yPos,width/32,height/32,image_angle,image_blend,image_alpha);
+//draw_sprite_ext(sprite_index,0,xPos,yPos,width/32,height/32,image_angle,image_blend,image_alpha);
+draw_set_color(menuOutlineColor);
+draw_rectangle(xPos,yPos,xPos+width,yPos+height,false);
+draw_set_color(menuColor);
+draw_rectangle(xPos+8,yPos+8,xPos+width-8,yPos+height-8,false);
+//draw_set_color(c_white);
+
+
+//draw_rectangle(xPos,yPos,xPos+width,yPos+height,true);
+/*var w = 3;
+var positions = makeArray(
+makeArray(xPos,yPos+w,xPos+width-w,yPos+w),
+makeArray(xPos+w,yPos+w,xPos+w,yPos+height-w),
+makeArray(xPos+w,yPos+height-w,xPos+width-w,yPos+height-w),
+makeArray(xPos+width-w,yPos+w,xPos+width-w,yPos+height-w)
+    
+    );
+for (var i = 0; i &lt; 4; i++)
+{
+    var pos = positions[i];
+    draw_line_width(pos[0],pos[1],pos[2],pos[3],8);
+}*/
+
+
+draw_set_color(c_white);
 
 draw_set_halign(fa_middle);
 draw_set_valign(fa_center);
@@ -227,34 +331,64 @@ var vals = array_create(0);
 switch (name)
 {
     case "objects":
-        
+    case "tiles":
         with (objLevelEditor)
         {
-            if (ds_list_size(selectedObjects) &lt;= 1)
+            switch (editingMode)
             {
-                selectedObject = ds_list_find_value(selectedObjects,0);
-                with (selectedObject)
-                {
-                    vals[0] = x;
-                    vals[1] = y;
-                    vals[2] = image_xscale;
-                    vals[3] = image_yscale;
-                    vals[4] = image_angle;
-                    vals[5] = image_alpha;
-                    vals[6] = image_blend;
-                    vals[7] = sprite_index;
-                }
+                case editModes.OBJECTS:
+                    if (ds_list_size(selectedObjects) &lt;= 1)
+                    {
+                        var selectedObject = ds_list_find_value(selectedObjects,0);
+                        with (selectedObject)
+                        {
+                            vals[0] = x;
+                            vals[1] = y;
+                            vals[2] = image_xscale;
+                            vals[3] = image_yscale;
+                            vals[4] = image_angle;
+                            vals[5] = image_alpha;
+                            vals[6] = image_blend;
+                            vals[7] = sprite_index;
+                        }
+                    }
+                    
+                break;
+                case editModes.TILES:
+                    if (ds_list_size(selectedObjects) &gt;= 1)
+                    {
+                        selectedObject = ds_list_find_value(selectedObjects,0);
+                        
+                        vals[0] = tile_get_x(selectedObject);
+                        vals[1] = tile_get_y(selectedObject);
+                        vals[2] = tile_get_xscale(selectedObject);
+                        vals[3] = tile_get_yscale(selectedObject);
+                        vals[4] = tile_get_depth(selectedObject);
+                        //vals[5] = tile_get_alpha(selectedObject);
+                        vals[5] = tile_get_blend(selectedObject);
+                        vals[6] = tile_get_background(selectedObject);
+                        vals[7] = tile_get_left(selectedObject);
+                        vals[8] = tile_get_top(selectedObject);
+                        vals[9] = tile_get_width(selectedObject);
+                        vals[10] = tile_get_height(selectedObject);
+                        
+                    }
+                break;
             }
         }
+        
     break;
 }
 for (var i = 0; i &lt; array_length_1d(buttons); i++)
 {
     var button = buttons[i];
-    draw_sprite_ext(button[e_EditorMenu.SpriteIndex],button[e_EditorMenu.ImageIndex],
-    button[e_EditorMenu.X]+xPos,button[e_EditorMenu.Y]+yPos,
-    button[e_EditorMenu.Width]/sprite_get_width(button[e_EditorMenu.SpriteIndex]),
-    button[e_EditorMenu.Height]/sprite_get_height(button[e_EditorMenu.SpriteIndex]),image_angle,image_blend,image_alpha);
+    if (button[e_EditorMenu.SpriteIndex] &gt;= 0)
+    {
+        draw_sprite_ext(button[e_EditorMenu.SpriteIndex],button[e_EditorMenu.ImageIndex],
+        button[e_EditorMenu.X]+xPos,button[e_EditorMenu.Y]+yPos,
+        button[e_EditorMenu.Width]/sprite_get_width(button[e_EditorMenu.SpriteIndex]),
+        button[e_EditorMenu.Height]/sprite_get_height(button[e_EditorMenu.SpriteIndex]),image_angle,image_blend,image_alpha);
+    }
     var midX = button[e_EditorMenu.X]+xPos+(button[e_EditorMenu.Width]/2);
     var midY = button[e_EditorMenu.Y]+yPos+(button[e_EditorMenu.Height]/2);
     switch (name)
@@ -297,6 +431,91 @@ for (var i = 0; i &lt; array_length_1d(buttons); i++)
                     else
                     {
                         draw_text(midX,midY,button[e_EditorMenu.Name] + "#???");
+                    }
+                    draw_set_color(c_white);
+                break;
+            }
+        break;
+        case "tiles":
+            index = 0;
+            switch (button[e_EditorMenu.Name])
+            {
+                
+                
+                case "TileChooser":
+                    var AX = button[e_EditorMenu.X]+xPos;
+                    var AY = button[e_EditorMenu.Y]+yPos;
+                    if (array_length_1d(vals) &gt; 0)
+                    {
+                        draw_background(vals[6],AX,AY);
+                        draw_rectangle(AX+vals[7],AY+vals[8],AX+vals[7]+vals[9],AY+vals[8]+vals[10],true);
+                        
+                        
+                        d3d_set_fog(true,c_yellow,0,0);
+                        draw_background_part_ext(vals[6],vals[7],vals[8],vals[9],vals[10],AX+vals[7],AY+vals[8],1,1,c_white,.5);//draw_self();//draw_sprite(sprite_index,image_index,x,y);
+                        d3d_set_fog(false,c_white,0,0);
+                    }
+                break;
+                case "Color":index++;
+                case "Depth":index++;
+                case "YScale":index++;
+                case "XScale":index++;
+                case "Y":index++;
+                case "X":
+                //default:
+                    draw_set_color(c_black);
+                    if (ds_list_size(objLevelEditor.selectedObjects) == 1)//index &lt; array_length_1d(vals))
+                    {
+                        draw_text(midX,midY,button[e_EditorMenu.Name] + "#" + string(vals[index]));
+                    }
+                    else
+                    {
+                        draw_text(midX,midY,button[e_EditorMenu.Name] + "#???");
+                    }
+                    draw_set_color(c_white);
+                break;
+            }
+        break;
+        case "mode":
+
+                draw_set_color(c_black);
+                draw_text(midX,midY,button[e_EditorMenu.Name]);
+                draw_set_color(c_white);
+                
+        break;
+        case "tileSelector":
+            switch (button[e_EditorMenu.Name])
+            {
+                case "Selector":
+                    var AX = button[e_EditorMenu.X]+xPos;
+                    var AY = button[e_EditorMenu.Y]+yPos;
+                    with (objLevelEditor)
+                    {
+                        draw_background(tileSelector_BG,AX,AY);
+                        draw_rectangle(tileSelector_Left+AX,tileSelector_Top+AY,tileSelector_Left+AX+tileSelector_Width,tileSelector_Top+AY+tileSelector_Height,true);
+                        
+                        
+                        d3d_set_fog(true,c_yellow,0,0);
+                        draw_background_part_ext(tileSelector_BG,tileSelector_Left,tileSelector_Top,tileSelector_Width,tileSelector_Height,AX+tileSelector_Left,AY+tileSelector_Top,1,1,c_white,.5);//draw_self();//draw_sprite(sprite_index,image_index,x,y);
+                        d3d_set_fog(false,c_white,0,0);
+                    }
+                break;
+                case "BGSelect":
+                    draw_set_color(c_black);
+                    with (objLevelEditor)
+                    {
+                        if (tileSelector_BG &gt;= 0)
+                        {
+                            draw_text(midX,midY,project_backgrounds_reverseLookup[? string(tileSelector_BG)]);
+                        }
+                    }
+                    draw_set_color(c_white);
+                break;
+                case "DepthSelect":
+                    draw_set_color(c_black);
+                    with (objLevelEditor)
+                    {
+                        draw_text(midX,midY,"Depth#" + string(tileSelector_Depth));
                     }
                     draw_set_color(c_white);
                 break;

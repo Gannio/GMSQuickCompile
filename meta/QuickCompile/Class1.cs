@@ -44,6 +44,7 @@ namespace QuickCompile
             bool doWait = parameters[5] == "true";
             string featherweightParams = "";
 
+
             if (parameters.Length > 6)
             {
                 featherweightParams = parameters[6];
@@ -56,7 +57,7 @@ namespace QuickCompile
                 string featherWeightProject = Path.GetDirectoryName(projectLoc);
                 featherWeightProject = featherWeightProject + "\\lw_" + Path.GetFileName(projectLoc);
                 //Console.WriteLine(fBuild);
-                var argF = "-x -gp -uc" + excludeData + " -roomw \"" + featherweightParams + "\" -p \"" + featherWeightProject + "\""/*args*/;
+                var argF = "-x -gp -uc" + excludeData + " -roomw \"" + featherweightParams + "\" -p \"" + projectLoc + "\""/*args*/;
                 Console.WriteLine(argF);
                 var fBuild = new ProcessStartInfo(slurDir)
                 {

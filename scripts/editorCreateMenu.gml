@@ -1,4 +1,4 @@
-/// editorCreateMenu(menuName,dir,sidePos,width,height)
+/// editorCreateMenu(menuName,dir,sidePos,width,height,color, outlineColor)
 var inst = instance_create(x,y,objEditorMenu);
 with (inst)
 {
@@ -6,10 +6,15 @@ with (inst)
     dir = argument[1];
     width = argument[3];
     height = argument[4];
-    if (dir == "left" || dir == "right")
+    if (dir == "right")
     {
         yPos = argument[2]-height/2;
         xPos = view_wview-hangMargin;
+    }
+    else if (dir == "left")
+    {
+        yPos = argument[2]-height/2;
+        xPos = -width+hangMargin;
     }
     else
     {
@@ -17,6 +22,8 @@ with (inst)
         yPos = view_hview-hangMargin;
     }
     parent = other;
+    menuColor = argument[5];
+    menuOutlineColor = argument[6];
     event_user(0);
 }
 return inst;

@@ -160,14 +160,66 @@ eventName = "";
 
 cancelRoomTouch = false;
 
+//Chooser modifies a currently selected tile(s), Selector sets a tile to add with.
+tileChooser_Left = -1;
+tileChooser_Top = -1;
+tileChooser_Width = -1;
+tileChooser_Height = -1;
 
-var menus = makeArray(editorCreateMenu("objects","right",(view_hview/2),300,300+64));
+tileSelector_Left = 0;
+tileSelector_Top = 0;
+tileSelector_Width = 16;
+tileSelector_Height = 16;
+tileSelector_BG = 0;
+tileSelector_Depth = 1000000;
 
+multiselectX = -1;
+multiselectY = -1;
 
+enum editModes{
+    OBJECTS,
+    TILES,
+    ROOMSETTINGS
+    
+}
+
+editingMode = editModes.OBJECTS;
+var menus = makeArray(
+    
+    editorCreateMenu("objects","right",(view_hview/2),300,300+128,make_color_rgb(0,120,248),make_color_rgb(60,188,242)),
+    editorCreateMenu("tiles","right",(view_hview/2),600,768,make_color_rgb(0,120,248),make_color_rgb(60,188,242)),
+    editorCreateMenu("room","right",(view_hview/2),300,300+128,make_color_rgb(0,120,248),make_color_rgb(60,188,242)),
+    //editorCreateMenu("tileSelector","left",(view_hview/2),600,768,make_color_rgb(0,120,248),make_color_rgb(60,188,242)),
+    editorCreateMenu("mode","bottom",(view_wview/2),500,200,make_color_rgb(0,120,248),make_color_rgb(60,188,242)),
+    editorCreateMenu("tileSelector","left",(view_hview/2),512,512,make_color_rgb(0,120,248),make_color_rgb(60,188,242))
+    
+    
+    );
+with (menus[0])
+{
+    depth -= 10;
+}
+with (menus[1])
+{
+    visible = false;
+}
+with (menus[2])
+{
+    visible = false;
+}
 
 event_user(1);
 
+eventName = "mode-Objects";
+
 display_set_gui_maximise();
+
+global.mouseLeftPressed = false;
+global.mouseRightPressed = false;
+global.mouseMiddlePressed = false;
+global.mouseLeft = false;
+global.mouseRight = false;
+global.mouseMiddle = false;
 
 </string>
           </argument>
@@ -216,10 +268,25 @@ display_set_gui_maximise();
           <argument>
             <kind>1</kind>
             <string>
+global.mouseLeftPressed = mouse_check_button_pressed(mb_left);
+global.mouseRightPressed = mouse_check_button_pressed(mb_right);
+global.mouseMiddlePressed = mouse_check_button_pressed(mb_middle);
+global.mouseLeft = mouse_check_button(mb_left);
+global.mouseRight = mouse_check_button(mb_right);
+global.mouseMiddle = mouse_check_button(mb_middle);
+global.mouseLeftReleased = mouse_check_button_released(mb_left);
+global.mouseRightReleased = mouse_check_button_released(mb_right);
+global.mouseMiddleReleased = mouse_check_button_released(mb_middle);
+
+
+
 cancelRoomTouch = false;
 with (objEditorMenu)
 {
-    event_user(1);
+    if (visible)
+    {
+        event_user(1);
+    }
 }
 if (cancelRoomTouch)
 {
@@ -253,189 +320,131 @@ if (mouse_wheel_up() || mouse_wheel_down())
     
     }
 }
-if (mouse_check_button(mb_middle))
+if (global.mouseMiddle)
 {
-    mouse_motionX = mouse_x-mouse_x_previous;
-    mouse_motionY = mouse_y-mouse_y_previous;
-    
-    view_xview -= mouse_motionX;
-    view_yview -= mouse_motionY;
+    if (keyboard_check(vk_shift))
+    {
+        if (global.mouseMiddlePressed)
+        {
+            multiselectX = mouse_x;
+            multiselectY = mouse_y;
+        }
+    }
+    else
+    {
+        multiselectX = -1;
+        multiselectY = -1;
+        mouse_motionX = mouse_x-mouse_x_previous;
+        mouse_motionY = mouse_y-mouse_y_previous;
+        
+        view_xview -= mouse_motionX;
+        view_yview -= mouse_motionY;
+    }
+}
+else if (global.mouseMiddleReleased)
+{
+    if (multiselectX &gt;= 0)
+    {
+        
+        
+        switch (editingMode)
+        {
+            case editModes.OBJECTS:
+                var tmps = makeArray(global.mouseLeftPressed,
+                global.mouseRightPressed,
+                global.mouseMiddlePressed,
+                global.mouseLeft,
+                global.mouseRight,
+                global.mouseMiddle,
+                global.mouseLeftReleased,
+                global.mouseRightReleased,
+                global.mouseMiddleReleased);
+                
+                
+                global.mouseLeftPressed=true;
+                global.mouseRightPressed=false;
+                global.mouseMiddlePressed=false;
+                global.mouseLeft=false;
+                global.mouseRight=false;
+                global.mouseMiddle=false;
+                global.mouseLeftReleased=false;
+                global.mouseRightReleased=false;
+                global.mouseMiddleReleased=false;
+                with (objEditorObject)
+                {
+                    if (collision_rectangle(other.multiselectX,other.multiselectY,mouse_x,mouse_y,id,true,false))
+                    {
+                        var X = bboxGetXCenter();
+                        var Y = bboxGetYCenter();
+                        with (other)
+                        {
+                            editorPerformEditingActions(true,true,X,Y);
+                        }
+                    }
+                }
+                var t = 0;
+                global.mouseLeftPressed=tmps[t++];
+                global.mouseRightPressed=tmps[t++];
+                global.mouseMiddlePressed=tmps[t++];
+                global.mouseLeft=tmps[t++];
+                global.mouseRight=tmps[t++];
+                global.mouseMiddle=tmps[t++];
+                global.mouseLeftReleased=tmps[t++];
+                global.mouseRightReleased=tmps[t++];
+                global.mouseMiddleReleased=tmps[t++];
+            break;
+            case editModes.TILES:
+                var mX;
+                var mY;
+                var eX = mouse_x;
+                var eY = mouse_y;
+                /*with (instance_create(multiselectX,multiselectY,objDummy))
+                {
+                    move_snap(16,16);
+                    mX = x;
+                    mY = y;//tile_set_position(selectedObject,x,y);
+                    x = eX;
+                    y = eY;
+                    move_snap(16,16);
+                    eX = x;
+                    eY = y;
+                    instance_destroy();
+                }*/
+                var tiles = findTileRectangle(multiselectX,multiselectY,mouse_x,mouse_y,1);
+                if (array_length_1d(tiles) &gt; 0)
+                {
+                    ds_list_clear(selectedObjects);
+                    ds_list_clear(selectedObjects_XOffset);
+                    ds_list_clear(selectedObjects_YOffset);
+                    for (var i = 0; i &lt; array_length_1d(tiles); i++)
+                    {
+                        ds_list_add(selectedObjects,tiles[i]);
+                        ds_list_add(selectedObjects_XOffset,tile_get_x(tiles[i])-mouse_x);
+                        ds_list_add(selectedObjects_XOffset,tile_get_y(tiles[i])-mouse_y);
+                    }
+                    global.mouseLeft=true;
+                }
+                /*for (var i = mX; i &lt; eX; i += 16)
+                {
+                    for (var j = mY; j &lt; eY; j+= 16)
+                    {
+                        
+                        
+                        //editorPerformEditingActions(true,true,i+8,j+8);
+                    }
+                }*/
+            break;
+        }
+        
+    }
 }
 
 mouse_x_previous = mouse_x-mouse_motionX;
 mouse_y_previous = mouse_y-mouse_motionY;
 
 
-var addedNewObject = false;
-var foundObject = collision_point(mouse_x,mouse_y,objEditorObject,false,false)
-var isOnEdge = -1;
-if (foundObject)
-{
-    if (ds_list_size(selectedObjects) &lt;= 1 &amp;&amp; ds_list_find_value(selectedObjects,0) == foundObject)
-    {
-        with (foundObject)
-        {
-            var range = 4;
-            var right = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_right,bbox_top,bbox_right,bbox_bottom) &gt; 0//Right box.
-            var up = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_left,bbox_top,bbox_right,bbox_top) &gt; 0//Top box.
-            var left = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_left,bbox_top,bbox_left,bbox_bottom) &gt; 0//Left.
-            var down = rectangle_in_rectangle(mouse_x-range,mouse_y-range,mouse_x+range,mouse_y+range,bbox_left,bbox_bottom,bbox_right,bbox_bottom) &gt; 0//Bottom.
-            
-            var X = right+-1*left;
-            var Y = down+-1*up;
-            if !(X == 0 &amp;&amp; Y == 0)
-            {
-                isOnEdge = round(point_direction(0,0,X,Y)/45)%8;
-                show_debug_message(X);
-                show_debug_message(Y);
-                
-            }
-            show_debug_message(isOnEdge);
-        }
-        
-        
-        
-    }
-}
-if (isOnEdge &gt;= 0)
-{
-    var cursors = makeArray(cr_size_we,cr_size_nesw,cr_size_ns,cr_size_nwse,cr_size_we,cr_size_nesw,cr_size_ns,cr_size_nwse);
-    
-    window_set_cursor(cursors[isOnEdge]);
-    
-}
-else if (window_get_cursor() != cr_default)
-{
-    window_set_cursor(cr_default);
-}
+editorPerformEditingActions();
 
-if (mouse_check_button_pressed(mb_left))
-{
-    //if (selectedObject == noone)
-    //{
-    //selectedObject = collision_point(mouse_x,mouse_y,objEditorObject,false,false)
-    //}
-    
-    if (foundObject == noone)
-    {
-        show_debug_message("Todo: Create");
-    }
-    else
-    {
-        
-        
-        if !(keyboard_check(vk_shift))
-        {
-            ds_list_clear(selectedObjects);
-            ds_list_clear(selectedObjects_XOffset);
-            ds_list_clear(selectedObjects_YOffset);
-            
-            
-            holdingType = isOnEdge+1;
-            holding_ScaleX = foundObject.image_xscale;
-            holding_ScaleY = foundObject.image_yscale;
-            
-        }
-        
-        holdingObject = true;
-        addedNewObject = true;
-        for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
-        {
-            var o = ds_list_find_value(selectedObjects,i);
-            ds_list_set(selectedObjects_XOffset,i,o.x-mouse_x);
-            ds_list_set(selectedObjects_YOffset,i,o.y-mouse_y);
-        }
-        var index = ds_list_find_index(selectedObjects,foundObject);
-        if (index &lt; 0)
-        {
-            ds_list_add(selectedObjects,foundObject);
-            ds_list_add(selectedObjects_XOffset, foundObject.x-mouse_x);
-            ds_list_add(selectedObjects_YOffset, foundObject.y-mouse_y);
-            
-        }
-        else if (keyboard_check(vk_shift))
-        {
-            ds_list_delete(selectedObjects,index);
-            ds_list_delete(selectedObjects_XOffset,index);
-            ds_list_delete(selectedObjects_YOffset,index);
-        }
-        
-    }
-}
-else if (mouse_check_button_released(mb_left))
-{
-    holdingObject = false;//selectedObject = noone;
-    holdingType = 0;
-}
-else if (mouse_check_button(mb_left))
-{
-    for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
-    {
-        var selectedObject = ds_list_find_value(selectedObjects,i);
-        var xOffset = ds_list_find_value(selectedObjects_XOffset,i);
-        var yOffset = ds_list_find_value(selectedObjects_YOffset,i);
-        if (instance_exists(selectedObject) &amp;&amp; holdingObject)
-        {
-            switch (holdingType)
-            {
-                case 0:
-                    selectedObject.x = mouse_x+xOffset;
-                    selectedObject.y = mouse_y+yOffset;
-                    with (selectedObject)
-                    {
-                        move_snap(16,16);
-                    }
-                break;
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                    var ht = holdingType;
-                    with (selectedObject)
-                    {
-                        
-                        
-                        
-                        
-                        var xs = 0;
-                        var ys = 0;
-                        if (ht &lt; 3 || ht &gt; 7)
-                        {
-                            xs = round(((mouse_x+xOffset)-(x - sprite_get_xoffset(sprite_index)))/(sprite_get_width(sprite_index))) + other.holding_ScaleX;
-                        }
-                        else if (ht &gt; 3 &amp;&amp; ht &lt; 7)
-                        {
-                            xs = -1*round(((mouse_x+xOffset)-(x + sprite_get_xoffset(sprite_index)))/(sprite_get_width(sprite_index))) + other.holding_ScaleX;
-                        }
-                        
-                        if (ht &gt; 1 &amp;&amp; ht &lt; 5)
-                        {
-                            ys = -1*round(((mouse_y+yOffset)-(y + sprite_get_yoffset(sprite_index)))/(sprite_get_height(sprite_index))) + other.holding_ScaleY;
-                        }
-                        else if (ht &gt; 5)
-                        {
-                            //show_debug_message("V");
-                            ys = round(((mouse_y+yOffset)-(y - sprite_get_yoffset(sprite_index)))/(sprite_get_height(sprite_index))) + other.holding_ScaleY;
-                        }
-                        //var ys = 
-                        if (sign(xs) != 0 &amp;&amp; ht != 3 &amp;&amp; ht != 7)
-                        {
-                            image_xscale = xs;
-                        }
-                        if (sign(ys) != 0 &amp;&amp; ht != 1 &amp;&amp; ht != 5)
-                        {
-                            image_yscale = ys;
-                        }
-                    }
-                break;
-            }
-        }
-    }
-}
 </string>
           </argument>
         </arguments>
@@ -460,7 +469,10 @@ else if (mouse_check_button(mb_left))
             <kind>1</kind>
             <string>///reserved for button usage.
 //show_debug_message(eventName);
-if (mouse_check_button_pressed(mb_left))
+var counter = 0;
+var mouseX = window_mouse_get_x();
+var mouseY = window_mouse_get_y();
+if (global.mouseLeftPressed)
 {
     switch (eventName)
     {
@@ -518,6 +530,170 @@ if (mouse_check_button_pressed(mb_left))
             }
         
         break;
+        case "tiles-TileChooser":
+            var AX;
+            var AY;
+            with (other)
+            {
+                var butt = buttons[array_length_1d(buttons)-1];
+                AX = butt[e_EditorMenu.X]+xPos;
+                AY = butt[e_EditorMenu.Y]+yPos;
+            }
+            var mX;
+            var mY;
+            with (instance_create(mouseX-AX-8,mouseY-AY-8,objDummy))
+            {
+                move_snap(16,16);
+                mX = x;
+                mY = y;//tile_set_position(selectedObject,x,y);
+                instance_destroy();
+            }
+            
+            tileChooser_Left = mX;
+            tileChooser_Top = mY;
+            tileChooser_Width = 16;
+            tileChooser_Height = 16;
+            /*var size = ds_list_size(selectedObjects);
+            if (size &gt;= 1)
+            {
+                for (var i = 0; i &lt; size; i++)
+                {
+                    var tile = ds_list_find_value(selectedObjects,i);
+                    var newLeft = 
+                }
+            }*/
+        break;
+        case "tileSelector-Selector":
+            var AX;
+            var AY;
+            with (other)
+            {
+                var butt = buttons[0];
+                AX = butt[e_EditorMenu.X]+xPos;
+                AY = butt[e_EditorMenu.Y]+yPos;
+            }
+            var mX;
+            var mY;
+            with (instance_create(mouseX-AX-8,mouseY-AY-8,objDummy))
+            {
+                move_snap(16,16);
+                mX = x;
+                mY = y;//tile_set_position(selectedObject,x,y);
+                instance_destroy();
+            }
+            
+            tileSelector_Left = mX;
+            tileSelector_Top = mY;
+            tileSelector_Width = 16;
+            tileSelector_Height = 16;
+            /*var size = ds_list_size(selectedObjects);
+            if (size &gt;= 1)
+            {
+                for (var i = 0; i &lt; size; i++)
+                {
+                    var tile = ds_list_find_value(selectedObjects,i);
+                    var newLeft = 
+                }
+            }*/
+        break;
+        case "mode-Room":
+            counter++;
+        case "mode-Tiles":
+            counter++;
+        case "mode-Objects":
+            var nam = string_lower(stringSubstring(eventName,6));
+            show_debug_message(nam);
+            /*for (var i = 0; i &lt; 3; i++)
+            {
+                menus[i].visible = counter == i;
+            }*/
+
+            with (objEditorMenu)
+            {
+                if ((name == "objects" || name == "tiles" || name == "room"))
+                {
+                    visible = name == nam;
+                }
+            }
+            editingMode = counter;
+            ds_list_clear(selectedObjects);
+            ds_list_clear(selectedObjects_XOffset);
+            ds_list_clear(selectedObjects_YOffset);
+            holdingObject = false;
+            holdingType = 0;
+            holding_ScaleX = 1;
+            holding_ScaleY = 1;
+        break;
+        case "tileSelector-DepthSelect":
+            var res = get_string("Choose the depth to switch to.",tileSelector_Depth);
+            if (string(real(res)) == res)
+            {
+                tileSelector_Depth = real(res);
+            }
+        break;
+    }
+}
+if (global.mouseLeft)
+{
+    switch (eventName)
+    {
+        case "tiles-TileChooser":
+            var AX;
+            var AY;
+            with (other)
+            {
+                var butt = buttons[array_length_1d(buttons)-1];
+                AX = butt[e_EditorMenu.X]+xPos;
+                AY = butt[e_EditorMenu.Y]+yPos;
+            }
+            
+            var tW = mouseX-AX-tileChooser_Left;
+            var tH = mouseY-AY-tileChooser_Top;
+            tW = round(tW/16)*16;
+            tH = round(tH/16)*16;
+            if (tW &gt; 0)
+            {
+                tileChooser_Width = tW;
+            }
+            if (tH &gt; 0)
+            {
+                tileChooser_Height = tH;
+            }
+            
+            
+            var size = ds_list_size(selectedObjects);
+            if (size &gt;= 1)
+            {
+                for (var i = 0; i &lt; size; i++)
+                {
+                    var tile = ds_list_find_value(selectedObjects,i);
+                    tile_set_region(tile,tileChooser_Left,tileChooser_Top,tileChooser_Width,tileChooser_Height);
+                }
+            }
+        break;
+        case "tileSelector-Selector":
+            var AX;
+            var AY;
+            with (other)
+            {
+                var butt = buttons[0];
+                AX = butt[e_EditorMenu.X]+xPos;
+                AY = butt[e_EditorMenu.Y]+yPos;
+            }
+            
+            var tW = mouseX-AX-tileSelector_Left;
+            var tH = mouseY-AY-tileSelector_Top;
+            tW = round(tW/16)*16;
+            tH = round(tH/16)*16;
+            if (tW &gt; 0)
+            {
+                tileSelector_Width = tW;
+            }
+            if (tH &gt; 0)
+            {
+                tileSelector_Height = tH;
+            }
+        break;
     }
 }
 else
@@ -545,6 +721,18 @@ else
                         }
                     }
                 }
+            }
+        break;
+        case "tileSelector-BGSelect":
+            var diff = mouse_wheel_up() + mouse_wheel_down()*-1;
+            show_debug_message(tileSelector_BG);
+            if (diff != 0)
+            {
+                if (background_exists(tileSelector_BG+diff))
+                {
+                    tileSelector_BG += diff;
+                }
+                //tileSelector_BG
             }
         break;
     }
@@ -708,26 +896,64 @@ while (line &lt; maxLineCount)
             <string>for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
 {
     var selectedObject = ds_list_find_value(selectedObjects,i);
-    with (selectedObject)
+    switch (editingMode)
     {
-        /*draw_set_color(c_white-background_color);//c_ltgray);
-        draw_rectangle(bbox_left-1,bbox_top-1,bbox_right+1,bbox_bottom+1,false);
-        draw_set_color(c_white);
-        other.depth = depth+1;*/
-        //var oB = image_blend;
-        //image_blend = c_yellow;
-        
-        draw_rectangle(bbox_left,bbox_top,bbox_right,bbox_bottom,true);
-        image_alpha = .5;
-        
-        
-        d3d_set_fog(true,c_yellow,0,0);
-        draw_self();//draw_sprite(sprite_index,image_index,x,y);
-        d3d_set_fog(false,c_white,0,0);
-        image_alpha = 1;
-        //image_blend = oB;
+        case editModes.OBJECTS:
+            with (selectedObject)
+            {
+                /*draw_set_color(c_white-background_color);//c_ltgray);
+                draw_rectangle(bbox_left-1,bbox_top-1,bbox_right+1,bbox_bottom+1,false);
+                draw_set_color(c_white);
+                other.depth = depth+1;*/
+                //var oB = image_blend;
+                //image_blend = c_yellow;
+                
+                draw_rectangle(bbox_left,bbox_top,bbox_right,bbox_bottom,true);
+                image_alpha = .5;
+                
+                
+                d3d_set_fog(true,c_yellow,0,0);
+                draw_self();//draw_sprite(sprite_index,image_index,x,y);
+                d3d_set_fog(false,c_white,0,0);
+                image_alpha = 1;
+                //image_blend = oB;
+            }
+        break;
+        case editModes.TILES:
+            var bb_left = tile_get_x(selectedObject);
+            var bb_top = tile_get_y(selectedObject);
+            var bb_right = bb_left+tile_get_width(selectedObject);
+            var bb_bottom = bb_top+tile_get_height(selectedObject);
+            var back = tile_get_background(selectedObject);
+            var left = tile_get_left(selectedObject);
+            var top = tile_get_top(selectedObject);
+            var W = tile_get_width(selectedObject);
+            var H = tile_get_height(selectedObject);
+            var XS = tile_get_xscale(selectedObject);
+            var YS = tile_get_yscale(selectedObject);
+            var col = tile_get_blend(selectedObject);
+            var al = tile_get_alpha(selectedObject);
+            
+            draw_rectangle(bb_left-1,bb_top-1,bb_right-1,bb_bottom-1,true);//For some reason we gotta subtract by 1.
+            //image_alpha = .5;
+            
+            
+            d3d_set_fog(true,c_yellow,0,0);
+            draw_background_part_ext(back,left,top,W,H,bb_left,bb_top,XS,YS,col,al*.5);//draw_self();//draw_sprite(sprite_index,image_index,x,y);
+            d3d_set_fog(false,c_white,0,0);
+            image_alpha = 1;
+        break;
     }
     //depth = 0;
+}
+if (mouse_check_button(mb_middle) &amp;&amp; keyboard_check(vk_shift))
+{
+    draw_set_alpha(.5);
+    draw_set_color(c_purple);
+    draw_rectangle(multiselectX,multiselectY,mouse_x,mouse_y,false);
+    draw_set_color(c_white);
+    draw_set_alpha(1);
+    draw_rectangle(multiselectX,multiselectY,mouse_x,mouse_y,true);
 }
 </string>
           </argument>

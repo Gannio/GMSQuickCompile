@@ -15,22 +15,31 @@
   <backgrounds name="background"/>
   <paths name="paths"/>
   <scripts name="scripts">
-    <script>scripts\stringTrim.gml</script>
-    <script>scripts\stringSplit.gml</script>
-    <script>scripts\stringAt.gml</script>
-    <script>scripts\stringEndsWith.gml</script>
-    <script>scripts\stringSubstring.gml</script>
-    <script>scripts\stringStartsWith.gml</script>
-    <script>scripts\xmlParseTag.gml</script>
-    <script>scripts\parseAsset.gml</script>
-    <script>scripts\makeArray.gml</script>
     <script>scripts\dec_to_hex.gml</script>
     <script>scripts\editorCreateMenu.gml</script>
+    <script>scripts\editorAttemptTileAtPoint.gml</script>
+    <script>scripts\findTile.gml</script>
+    <script>scripts\findTileRectangle.gml</script>
+    <script>scripts\editorPerformEditingActions.gml</script>
+    <scripts name="MegamixRelated">
+      <script>scripts\makeArray.gml</script>
+      <script>scripts\parseAsset.gml</script>
+      <script>scripts\xmlParseTag.gml</script>
+      <script>scripts\stringStartsWith.gml</script>
+      <script>scripts\stringSubstring.gml</script>
+      <script>scripts\stringEndsWith.gml</script>
+      <script>scripts\stringAt.gml</script>
+      <script>scripts\stringSplit.gml</script>
+      <script>scripts\stringTrim.gml</script>
+      <script>scripts\bboxGetXCenter.gml</script>
+      <script>scripts\bboxGetYCenter.gml</script>
+    </scripts>
   </scripts>
   <objects name="objects">
     <object>objects\objButton</object>
     <object>objects\objEditorObject</object>
     <object>objects\objEditorMenu</object>
+    <object>objects\objDummy</object>
     <object>objects\objLevelEditor</object>
   </objects>
   <rooms name="rooms">
