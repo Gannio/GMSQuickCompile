@@ -135,7 +135,7 @@ switch (editingMode)
                             selectedObject.y = mouseY+yOffset;
                             with (selectedObject)
                             {
-                                move_snap(16,16);
+                                move_snap(gridsnap_X,gridsnap_Y);
                             }
                         break;
                         case 1:
@@ -321,7 +321,7 @@ switch (editingMode)
                                 
                                 with (instance_create((mouseX+xOffset),(mouseY+yOffset),objDummy))
                                 {
-                                    move_snap(16,16);
+                                    move_snap(gridsnap_X,gridsnap_Y);
                                     tile_set_position(selectedObject,x,y);
                                     instance_destroy();
                                 }

@@ -156,6 +156,7 @@ holding_ScaleY = 1;
 
 gridsnap_X = 16;
 gridsnap_Y = 16;
+showGrid = true;
 eventName = "";
 
 cancelRoomTouch = false;
@@ -220,6 +221,8 @@ global.mouseMiddlePressed = false;
 global.mouseLeft = false;
 global.mouseRight = false;
 global.mouseMiddle = false;
+
+
 
 </string>
           </argument>
@@ -400,12 +403,12 @@ else if (global.mouseMiddleReleased)
                 var eY = mouse_y;
                 /*with (instance_create(multiselectX,multiselectY,objDummy))
                 {
-                    move_snap(16,16);
+                    move_snap(gridsnap_X,gridsnap_Y);
                     mX = x;
                     mY = y;//tile_set_position(selectedObject,x,y);
                     x = eX;
                     y = eY;
-                    move_snap(16,16);
+                    move_snap(gridsnap_X,gridsnap_Y);
                     eX = x;
                     eY = y;
                     instance_destroy();
@@ -541,9 +544,9 @@ if (global.mouseLeftPressed)
             }
             var mX;
             var mY;
-            with (instance_create(mouseX-AX-8,mouseY-AY-8,objDummy))
+            with (instance_create(mouseX-AX-(gridsnap_X*.5),mouseY-AY-(gridsnap_Y*.5),objDummy))
             {
-                move_snap(16,16);
+                move_snap(gridsnap_X,gridsnap_Y);
                 mX = x;
                 mY = y;//tile_set_position(selectedObject,x,y);
                 instance_destroy();
@@ -574,9 +577,9 @@ if (global.mouseLeftPressed)
             }
             var mX;
             var mY;
-            with (instance_create(mouseX-AX-8,mouseY-AY-8,objDummy))
+            with (instance_create(mouseX-AX-(gridsnap_X*.5),mouseY-AY-(gridsnap_Y*.5),objDummy))
             {
-                move_snap(16,16);
+                move_snap(gridsnap_X,gridsnap_Y);
                 mX = x;
                 mY = y;//tile_set_position(selectedObject,x,y);
                 instance_destroy();
@@ -893,7 +896,18 @@ while (line &lt; maxLineCount)
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
+            <string>if (showGrid)
+{
+    for (var i = floor(view_xview/16)*16; i &lt; view_xview+view_wview; i += gridsnap_X)
+    {
+        draw_line(i,view_yview,i,view_yview+view_hview);
+    }
+    for (var j = floor(view_yview/16)*16; j &lt; view_yview+view_hview; j += gridsnap_Y)
+    {
+        draw_line(view_xview,j,view_xview+view_wview,j);
+    }
+}
+for (var i = 0; i &lt; ds_list_size(selectedObjects); i++)
 {
     var selectedObject = ds_list_find_value(selectedObjects,i);
     switch (editingMode)

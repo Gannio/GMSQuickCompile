@@ -8,7 +8,7 @@ var tY = floor(argument[1]/16)*16;
     tY = y;
     instance_destroy();
 }*/
-if (findTile(tX+8,tY+8,tileSelector_Depth) == noone)
+if (findTile(tX+gridsnap_X*.5,tY+gridsnap_Y*.5,tileSelector_Depth) == noone)
 {
     tile_add(tileSelector_BG,tileSelector_Left,tileSelector_Top,tileSelector_Width,tileSelector_Height,tX,tY,tileSelector_Depth);
 }

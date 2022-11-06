@@ -33,6 +33,7 @@
       <script>scripts\stringTrim.gml</script>
       <script>scripts\bboxGetXCenter.gml</script>
       <script>scripts\bboxGetYCenter.gml</script>
+      <script>scripts\inRange.gml</script>
     </scripts>
   </scripts>
   <objects name="objects">
