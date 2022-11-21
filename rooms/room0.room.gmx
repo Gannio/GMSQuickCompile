@@ -28,7 +28,7 @@ global.featherweightRooms_AlwaysKeep = ini_read_string("main","fwRoomsAK","rmIni
 global.featherweightRooms = ini_read_string("main","fwRooms","");
 //global.featherweightRemoveDatafiles = ini_read_string("main","fwRemoveData",false);
 global.featherweightExcludeDatafileSearch = ini_read_string("main","fwExcludeDataSearch",false);
-global.runnerDebug = ini_read_string("main","runnerDebug",false);
+global.runnerDebug = ini_read_real("main","runnerDebug",false);
 
 ini_close();</code>
   <enableViews>0</enableViews>

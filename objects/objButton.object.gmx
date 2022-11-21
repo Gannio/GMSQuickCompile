@@ -142,7 +142,7 @@ switch (action)
     ini_write_string("main","fwRoomsAK",global.featherweightRooms_AlwaysKeep);
     ini_write_string("main","fwRooms",global.featherweightRooms);
     ini_write_string("main","fwExcludeDataSearch",global.featherweightExcludeDatafileSearch);
-    ini_write_string("main","runnerDebug",global.runnerDebug);
+    ini_write_real("main","runnerDebug",global.runnerDebug);
     ini_close();
 }
 </string>
