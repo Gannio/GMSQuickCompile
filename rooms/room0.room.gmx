@@ -28,6 +28,7 @@ global.featherweightRooms_AlwaysKeep = ini_read_string("main","fwRoomsAK","rmIni
 global.featherweightRooms = ini_read_string("main","fwRooms","");
 //global.featherweightRemoveDatafiles = ini_read_string("main","fwRemoveData",false);
 global.featherweightExcludeDatafileSearch = ini_read_string("main","fwExcludeDataSearch",false);
+global.runnerDebug = ini_read_string("main","runnerDebug",false);
 
 ini_close();</code>
   <enableViews>0</enableViews>
@@ -81,6 +82,7 @@ ini_close();</code>
     <instance objName="objButton" x="864" y="576" name="inst_57F290A1" locked="0" code="action = &quot;Feather Compile &amp; Run&quot;;" scaleX="2" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="160" y="576" name="inst_DA6EE73D" locked="0" code="action = &quot;Featherweight#Settings&quot;;&#xA;" scaleX="2" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="512" y="576" name="inst_AAC21AE4" locked="0" code="action = &quot;Clean Temp&quot;;&#xA;" scaleX="2" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="objButton" x="544" y="672" name="inst_377C84B9" locked="0" code="action = &quot;DebugMode&quot;;&#xA;" scaleX="0.5" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

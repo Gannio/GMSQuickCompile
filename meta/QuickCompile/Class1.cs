@@ -34,6 +34,11 @@ namespace QuickCompile
         static string lastRunCommand = "";
         static string lastRunArgs = "";
         static string lastRunCD = "";
+
+        static string lastRunDebugCommand = "";
+        static string lastRunDebugArgs = "";
+        static bool lastRunWasDebug = false;
+
         private static void Compile(string[] parameters)
         {
             string cacheLoc = parameters[0];//Marshal.PtrToStringAnsi((IntPtr)detailsC);
@@ -42,14 +47,15 @@ namespace QuickCompile
             string projectLoc = parameters[3];// Marshal.PtrToStringAnsi((IntPtr)smallC);
             string runnerLoc = "\"" + parameters[4] + "\"";
             bool doWait = parameters[5] == "true";
+            bool doDebug = parameters[6] == "true";
             string featherweightParams = "";
 
-
-            if (parameters.Length > 6)
+            
+            if (parameters.Length > 7)
             {
-                featherweightParams = parameters[6];
+                featherweightParams = parameters[7];
                 var excludeData = "";
-                if (parameters.Length > 7)
+                if (parameters.Length > 8)
                 {
                     excludeData = " -nd";
                 }
@@ -86,9 +92,13 @@ namespace QuickCompile
             //string largeImage = parameters[4];// Marshal.PtrToStringAnsi((IntPtr)largeImageC);
             //string smallImage = parameters[5];// Marshal.PtrToStringAnsi((IntPtr)smallImageC);
 
-
-            string program = "\"" + /*@"C:\Program Files (x86)\Steam\steamapps\common\gamemaker_studio\GMAssetCompiler.exe"*/compilerLoc + "\"";
-            string args = " /c /m=win  /config=\"Default\" /tgt=64 /obob=True /obpp=False /obru=True /obes=False /i=3 /j=16 /cvm /tp=2048 /mv=1 /iv=0 /rv=0 /bv=1804 /gn=\"" + gameName + "\" /td=\"" + tempLoc + "\" /cd=\"" + cacheLoc + "\" /sh=True /dbgp=\"6502\" /hip=\"192.168.56.1\" /hprt=\"51268\" /o=\"" + tempLoc + tempName + "\" \"" + projectLoc + "\"";
+            string debugStr = "";
+            if (doDebug)
+            {
+                debugStr = "/debug ";
+            }/*@"C:\Program Files (x86)\Steam\steamapps\common\gamemaker_studio\GMAssetCompiler.exe"*/
+            string program = "\"" + compilerLoc + "\"";
+            string args = " /c /m=win  " + debugStr + "/config=\"Default\" /tgt=64 /obob=True /obpp=False /obru=True /obes=False /i=3 /j=16 /cvm /tp=2048 /mv=1 /iv=0 /rv=0 /bv=1804 /gn=\"" + gameName + "\" /td=\"" + tempLoc + "\" /cd=\"" + cacheLoc + "\" /sh=True /dbgp=\"6502\" /hip=\"192.168.56.1\" /hprt=\"51268\" /o=\"" + tempLoc + tempName + "\" \"" + projectLoc + "\"";
 
 
 
@@ -106,7 +116,37 @@ namespace QuickCompile
             };
             var p = Process.Start(psi);
             p.WaitForExit();
+            Console.WriteLine(program + args);
+            if (doDebug)//We need to launch this inside GMS as well sadly.
+            {
 
+                var debugCompilerLoc = Path.GetDirectoryName(compilerLoc) + "\\GMDebug\\GMDebug.exe";
+                var xmlFind =
+                program = "\"" + debugCompilerLoc + "\"";
+                args = " -d=\"" + tempLoc + tempName + "\\" + gameName + ".yydebug\""
+                     + " -t=\"127.0.0.1\""
+                     + " -u=\"" + cacheLoc + "\\" + gameName + "\\" + FindTheXMLFile(cacheLoc + "\\" + gameName + "\\", gameName) + "\""
+                     + " -p=\"" + projectLoc + "\" -c=\"Default\" -ac=\"" + compilerLoc + "\" -tp=6502";
+                Console.WriteLine(program + args);
+                lastRunDebugCommand = program;
+                lastRunDebugArgs = args;
+                lastRunWasDebug = true;
+                psi = new ProcessStartInfo(program)//For technical reasons, this part can't do the usual wait.
+                {
+                    Arguments = args,
+
+                    UseShellExecute = true,//!doWait,
+                    CreateNoWindow = false,
+                    //RedirectStandardInput = true,
+                    //RedirectStandardOutput = doWait
+                };
+                p = Process.Start(psi);//We can't wait for exit since we need to finish!
+                //p.WaitForExit();
+            }
+            else
+            {
+                lastRunWasDebug = false;
+            }
 
             /*string newRunner = tempLoc + tempName + "\\Runner.exe";//Because of a quirk with FMOD running on a runner ran outside GMS, we need to copy it to the local area. 4MB per compile just about.
             Console.WriteLine(newRunner);//File.WriteAllText("test.txt", newRunner);
@@ -149,7 +189,7 @@ namespace QuickCompile
             //p.StartInfo = psi;
             //p.Start();
             Process.Start(tempLoc + tempName + "\\" + "runLast.bat", null,null,"GMSTest");
-            Console.WriteLine(program + args);
+            
         }
 
         [DllExport("QuickCompile_CleanTemp", CallingConvention.Cdecl)]
@@ -192,7 +232,7 @@ namespace QuickCompile
         }
 
 
-            [DllExport("QuickCompile_Run", CallingConvention.Cdecl)]
+        [DllExport("QuickCompile_Run", CallingConvention.Cdecl)]
         public static unsafe double RunTest()
         {
             if (lastRunCommand == "")
@@ -200,6 +240,25 @@ namespace QuickCompile
                 Console.WriteLine("Wait for compile to finish first!");
                 return 0;
             }
+            if (lastRunWasDebug)//We need to launch this inside GMS as well sadly.
+            {
+
+                var program = lastRunDebugCommand;
+                var args = lastRunDebugArgs;
+                Console.WriteLine(program + args);
+                var psi = new ProcessStartInfo(program)//For technical reasons, this part can't do the usual wait.
+                {
+                    Arguments = args,
+
+                    UseShellExecute = true,//!doWait,
+                    CreateNoWindow = false,
+                    //RedirectStandardInput = true,
+                    //RedirectStandardOutput = doWait
+                };
+                var p = Process.Start(psi);//We can't wait for exit since we need to finish!
+                //p.WaitForExit();
+            }
+
             Run(false);
             return 1;
 
@@ -225,6 +284,13 @@ namespace QuickCompile
             }
             /*p.StandardInput.WriteLine(lastRunCD);
             p.StandardInput.WriteLine(lastRunCommand + lastRunArgs);*/
+        }
+        private static string FindTheXMLFile(string directory,string gameName)
+        {
+            Console.WriteLine("Searching for first XML file for debugging.");
+            var matches = Directory.GetFiles(directory,gameName + ".*.xml");
+            Console.WriteLine("Found " + matches[0]);
+            return Path.GetFileName(matches[0]);
         }
     }
 }

@@ -65,7 +65,12 @@ switch (action)
         {
             doWait = "true";
         }
-        var params = global.cacheLocation + "*" + global.tempLocation + "*" + global.compilerLocation + "*" + global.projectLocation + "*" + global.runnerLocation + "*" + doWait;
+        var doDebug = "false";
+        if (global.runnerDebug)
+        {
+            doDebug = "true";
+        }
+        var params = global.cacheLocation + "*" + global.tempLocation + "*" + global.compilerLocation + "*" + global.projectLocation + "*" + global.runnerLocation + "*" + doWait + "*" + doDebug;
         if (action == "Feather Compile &amp; Run")
         {
             global.featherweightRooms = get_string("Enter levels you want, spaced apart, without the .room.gmx extension:",global.featherweightRooms);
@@ -98,6 +103,9 @@ switch (action)
         get_integer("(Use a 0 for false, 1 for true) Are you sure? This will delete *all* previous compiles made using QuickCompiler.",0);
         QuickCompile_CleanTemp(global.tempLocation);
         show_debug_message("Done!");
+    break;
+    case "DebugMode":
+        global.runnerDebug = !global.runnerDebug;
     break;
 
 }
@@ -134,6 +142,7 @@ switch (action)
     ini_write_string("main","fwRoomsAK",global.featherweightRooms_AlwaysKeep);
     ini_write_string("main","fwRooms",global.featherweightRooms);
     ini_write_string("main","fwExcludeDataSearch",global.featherweightExcludeDatafileSearch);
+    ini_write_string("main","runnerDebug",global.runnerDebug);
     ini_close();
 }
 </string>
@@ -160,43 +169,71 @@ switch (action)
             <kind>1</kind>
             <string>draw_self();
 draw_set_valign(fa_middle);
-if (action == "Run" || action == "Compile+Run" || action == "Feather Compile &amp; Run" || action == "RoomEditor" || action == "Featherweight#Settings")
+switch (action)
 {
-    draw_set_color(c_black);
-    draw_set_halign(fa_center);
-    draw_text(x,y,action);
-    draw_set_halign(fa_left);
-    draw_set_color(c_white);
+    case "Run":
+    case "Compile+Run":
+    case "Feather Compile &amp; Run":
+    case "RoomEditor":
+    case "Featherweight#Settings":
+        draw_set_color(c_black);
+        draw_set_halign(fa_center);
+        draw_text(x,y,action);
+        draw_set_halign(fa_left);
+        draw_set_color(c_white);
+    break;
+    case "DebugMode":
+        draw_set_halign(fa_center);
+        if (global.runnerDebug)
+        {
+            draw_set_color(c_black);
+            draw_sprite_ext(sprite_index,0,x,y,image_xscale-.2,image_yscale-.4,0,c_black,1);//draw_rectangle(x+8,y+8,x+sprite_width*.5-8,y+sprite_height*.5-8,false);
+            draw_set_color(c_white);
+            draw_text(x,y,"On");
+        }
+        else
+        {
+            draw_set_color(c_black);
+            draw_text(x,y,"Off");
+            draw_set_color(c_white);
+            
+        }
+        
+        draw_text(x,y+sprite_height,"Debug Mode");
+        draw_set_halign(fa_left);
+        
+    break;
+    default:
+        draw_set_color(c_black);
+        draw_set_halign(fa_center);
+        draw_text(x,y,action + " Loc");
+        draw_set_halign(fa_left);
+        var loc = "";
+        switch (action)
+        {
+            case "Cache":
+                loc = global.cacheLocation;
+            break;
+            case "Compiler":
+                loc = global.compilerLocation;
+            break;
+            case "Project":
+                loc = global.projectLocation;
+            break;
+            case "Temp":
+                loc = global.tempLocation;
+            break;
+            case "Runner":
+                loc = global.runnerLocation;
+            break;
+        
+        }
+        draw_set_color(c_white);
+        draw_text(view_xview,y,loc);
+    break;
+
 }
-else
-{
-    draw_set_color(c_black);
-    draw_set_halign(fa_center);
-    draw_text(x,y,action + " Loc");
-    draw_set_halign(fa_left);
-    var loc = "";
-    switch (action)
-    {
-        case "Cache":
-            loc = global.cacheLocation;
-        break;
-        case "Compiler":
-            loc = global.compilerLocation;
-        break;
-        case "Project":
-            loc = global.projectLocation;
-        break;
-        case "Temp":
-            loc = global.tempLocation;
-        break;
-        case "Runner":
-            loc = global.runnerLocation;
-        break;
-    
-    }
-    draw_set_color(c_white);
-    draw_text(view_xview,y,loc);
-}
+
 draw_set_valign(fa_top);
 </string>
           </argument>
