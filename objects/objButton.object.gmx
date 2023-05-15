@@ -60,6 +60,10 @@ switch (action)
     break;
     case "Compile+Run":
     case "Feather Compile &amp; Run":
+        if (global.featherweightAutoDelete)
+        {
+            QuickCompile_CleanTemp(global.tempLocation);
+        }
         var doWait = "";
         if (keyboard_check(vk_lshift) || keyboard_check(vk_rshift))
         {
@@ -90,9 +94,10 @@ switch (action)
             }
         }
     break;
-    case "Featherweight#Settings":
-        global.featherweightRooms_AlwaysKeep = get_string("Enter rooms that are strictly necessary for your project to run, like rooms leading up to your room select: ",global.featherweightRooms_AlwaysKeep);
+    case "Settings":
+        global.featherweightRooms_AlwaysKeep = get_string("Enter rooms that are strictly necessary for your featherweight project to run, like rooms leading up to your room select: ",global.featherweightRooms_AlwaysKeep);
         global.featherweightExcludeDatafileSearch = get_integer("(Use a 0 for false, 1 for true) Include datafiles in the featherweight search? Use 1 if you don't need external rooms.",global.featherweightExcludeDatafileSearch);
+        global.featherweightAutoDelete = get_integer("(Use a 0 for false, 1 for true) Auto-delete previously compiled projects?",global.featherweightAutoDelete);
         //global.featherweightRemoveDatafiles = get_integer("(Use a 0 for false, 1 for true) Remove OGG's from the output? Use 1 if you don't need external rooms.",featherweightExcludeDatafileSearch);
         
     break;
@@ -143,6 +148,7 @@ switch (action)
     ini_write_string("main","fwRooms",global.featherweightRooms);
     ini_write_string("main","fwExcludeDataSearch",global.featherweightExcludeDatafileSearch);
     ini_write_real("main","runnerDebug",global.runnerDebug);
+    ini_write_real("main","autoDelete",global.featherweightAutoDelete);
     ini_close();
 }
 </string>
@@ -175,7 +181,7 @@ switch (action)
     case "Compile+Run":
     case "Feather Compile &amp; Run":
     case "RoomEditor":
-    case "Featherweight#Settings":
+    case "Settings":
         draw_set_color(c_black);
         draw_set_halign(fa_center);
         draw_text(x,y,action);
