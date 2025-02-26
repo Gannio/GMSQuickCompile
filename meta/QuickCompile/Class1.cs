@@ -203,7 +203,7 @@ namespace QuickCompile
                 string dirs = parameters[0] + "\\gm_TQCFiles\\";
                 if (!Directory.Exists(dirs))
                 {
-                    Console.WriteLine("Temp directory does not exist!");
+                    Console.WriteLine("Temp directory " + parameters[0] + " does not exist!");
                 }
                 else
                 { 

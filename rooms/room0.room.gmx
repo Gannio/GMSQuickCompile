@@ -16,6 +16,8 @@ global.compilerLocation = "";
 global.tempLocation = "";*/
 
 
+
+
 var appData = string_replace(environment_get_variable("APPDATA"),"AppData\Roaming","AppData\Local");
 var documents = string_replace(environment_get_variable("APPDATA"),"AppData\Roaming","Documents");
 ini_open("save.ini");
@@ -80,7 +82,7 @@ ini_close();</code>
     <instance objName="objButton" x="928" y="672" name="inst_88526017" locked="0" code="action = &quot;Compile+Run&quot;;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="928" y="480" name="inst_E222B99A" locked="0" code="action = &quot;Runner&quot;;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="736" y="672" name="inst_FF5A5769" locked="0" code="action = &quot;Run&quot;;&#xA;y += 8*16&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="objButton" x="96" y="672" name="inst_08EE41BA" locked="0" code="action = &quot;RoomEditor&quot;;&#xA;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="objButton" x="96" y="672" name="inst_08EE41BA" locked="0" code="action = &quot;RoomEditor&quot;;" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="864" y="576" name="inst_57F290A1" locked="0" code="action = &quot;Feather Compile &amp; Run&quot;;" scaleX="2" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="160" y="576" name="inst_DA6EE73D" locked="0" code="action = &quot;Settings&quot;;&#xA;" scaleX="2" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="objButton" x="512" y="576" name="inst_AAC21AE4" locked="0" code="action = &quot;Clean Temp&quot;;&#xA;" scaleX="2" scaleY="1" colour="4294967295" rotation="0"/>

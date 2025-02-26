@@ -546,7 +546,7 @@ if (global.mouseLeftPressed)
             var mY;
             with (instance_create(mouseX-AX-(gridsnap_X*.5),mouseY-AY-(gridsnap_Y*.5),objDummy))
             {
-                move_snap(gridsnap_X,gridsnap_Y);
+                move_snap(other.gridsnap_X,other.gridsnap_Y);
                 mX = x;
                 mY = y;//tile_set_position(selectedObject,x,y);
                 instance_destroy();
@@ -579,7 +579,7 @@ if (global.mouseLeftPressed)
             var mY;
             with (instance_create(mouseX-AX-(gridsnap_X*.5),mouseY-AY-(gridsnap_Y*.5),objDummy))
             {
-                move_snap(gridsnap_X,gridsnap_Y);
+                move_snap(other.gridsnap_X,other.gridsnap_Y);
                 mX = x;
                 mY = y;//tile_set_position(selectedObject,x,y);
                 instance_destroy();

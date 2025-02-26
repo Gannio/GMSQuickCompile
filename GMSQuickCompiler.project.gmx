@@ -15,12 +15,14 @@
   <backgrounds name="background"/>
   <paths name="paths"/>
   <scripts name="scripts">
-    <script>scripts\dec_to_hex.gml</script>
-    <script>scripts\editorCreateMenu.gml</script>
-    <script>scripts\editorAttemptTileAtPoint.gml</script>
-    <script>scripts\findTile.gml</script>
-    <script>scripts\findTileRectangle.gml</script>
-    <script>scripts\editorPerformEditingActions.gml</script>
+    <scripts name="Room Viewer">
+      <script>scripts\dec_to_hex.gml</script>
+      <script>scripts\editorCreateMenu.gml</script>
+      <script>scripts\editorAttemptTileAtPoint.gml</script>
+      <script>scripts\findTile.gml</script>
+      <script>scripts\editorPerformEditingActions.gml</script>
+      <script>scripts\findTileRectangle.gml</script>
+    </scripts>
     <scripts name="MegamixRelated">
       <script>scripts\makeArray.gml</script>
       <script>scripts\parseAsset.gml</script>
@@ -36,6 +38,9 @@
       <script>scripts\inRange.gml</script>
     </scripts>
   </scripts>
+  <fonts name="fonts">
+    <font>fonts\font0</font>
+  </fonts>
   <objects name="objects">
     <object>objects\objButton</object>
     <object>objects\objEditorObject</object>
